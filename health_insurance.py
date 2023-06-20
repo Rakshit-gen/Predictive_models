@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
+import sklearn.metrics as smt
 from sklearn.linear_model import LinearRegression
+import csv
 from currency_converter import CurrencyConverter as cc
 
 cs=cc()
-df=pd.read_csv('insurance.csv')  #import insurance.csv file from the repository first for this to work
+df=pd.read_csv('insurance.csv')
 
 def data_split(data,ratio):
     np.random.seed(42)
@@ -13,7 +15,7 @@ def data_split(data,ratio):
     train_ind=shuffle[testsize:]
     test_ind=shuffle[:testsize]
     return data.iloc[train_ind],data.iloc[test_ind]
-train,test=data_split(df,0.2)
+train,test=data_split(df,0.999)
 X_train=train[['age','sex','bmi','children','smoker','region']].to_numpy()
 Y_train=train[['charges']].to_numpy()
 X_test=test[['age','sex','bmi','children','smoker','region']].to_numpy()
@@ -49,5 +51,16 @@ reg=int(input('Choice:'))
 ans=[age,s,bmi,chil,tt,reg]
 
 ss=clf.predict([ans])
+ans.insert(6,ss)
 PS=cs.convert(ss[0][0].round(3),'USD','INR')
-print('Insurance is:', PS, 'Indian Rupees')
+print('Insurance is:', round(PS,2), 'Indian Rupees')
+print('Insurance is:', round(ss[0][0],2), 'Dollars')
+rega=input('Do you wanna help improve the dataset with your data provided(y/n)')
+if rega.lower()=='y':
+    print('Thank you for helping us...')
+    with open("insurance.csv",mode='a',newline="") as file:
+        writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(ans)
+    file.close()
+else:
+    print('Thank you for taking the test...')
